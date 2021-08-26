@@ -1,0 +1,39 @@
+#! /bin/sh
+
+if [ -z "$HARVEST_ACCESS_TOKEN" ]; then
+    echo >&2 "Please set HARVEST_ACCESS_TOKEN"
+    exit 1
+fi
+
+if [ -z "$HARVEST_ACCOUNT_ID" ]; then
+    echo >&2 "Please set HARVEST_ACCOUNT_ID"
+    exit 1
+fi
+
+ACCESS_TOKEN=$HARVEST_ACCESS_TOKEN
+ACCOUNT_ID=$HARVEST_ACCOUNT_ID
+PROJECT_ID=4948863   # Internal
+TASK_ID=2990320      # Vacation
+START_DATE="2021-08-23"
+END_DATE="2021-08-29"
+
+END=$(date -d "$END_DATE" "+%s")
+CURRENT=$(date -d "$START_DATE" "+%s")
+
+while [ $CURRENT -le $END ]; do
+    TMP_DATE=$(date -I -d @$CURRENT)
+    DAY_OF_WEEK=$(date -d $TMP_DATE "+%u")
+
+    if [ $DAY_OF_WEEK -le 5 ]; then
+        curl "https://api.harvestapp.com/v2/time_entries" \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "Harvest-Account-Id: $ACCOUNT_ID" \
+            -H "User-Agent: harvest_bulk" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d '{"project_id":'"$PROJECT_ID"',"task_id":'"$TASK_ID"',"spent_date":"'"$TMP_DATE"'","started_time":"9:00am", "ended_time": "5:00pm"}'
+    fi  
+
+    CURRENT=$(date -d "$TMP_DATE + 1 day" "+%s")
+done
+
