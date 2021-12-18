@@ -1,21 +1,29 @@
 #! /bin/sh
 
-if [ -z "$HARVEST_ACCESS_TOKEN" ]; then
-    echo >&2 "Please set HARVEST_ACCESS_TOKEN"
+ACCESS_TOKEN=$1
+ACCOUNT_ID=$2
+START_DATE=$3 # "2021-08-09"
+END_DATE=$4 # "2021-08-29"
+PROJECT_ID=${5:-4948863}   # Internal
+TASK_ID=${6-2990320}      # Vacation
+
+usage() {
+    echo "Usage: $0 <access_token> <account_id> <start_date> <end_date> [<project_id> [<task_id>]]"
+    echo "  <access_token>   - access token from harvest"
+    echo "  <account_id>     - account ID from harvest"
+    echo "  <start_date>     - start date in yyyy-mm-dd format"
+    echo "  <end_date>       - end date in yyyy-mm-dd format"
+    echo "  <project_id>     - project ID from harvest (default: 4948863)"
+    echo "  <task_id>        - task ID from harvest (default: 2990320)"
+    echo "Example"
+    echo "  $0 <access_token> <account_id> 2020-01-01 2020-01-31"
+    exit 1
+}
+
+if [ -z "$START_DATE" ] || [ -z "$END_DATE" ] || [ -z "$HARVEST_ACCESS_TOKEN" ] || [ -z "$HARVEST_ACCOUNT_ID" ]; then
+    usage
     exit 1
 fi
-
-if [ -z "$HARVEST_ACCOUNT_ID" ]; then
-    echo >&2 "Please set HARVEST_ACCOUNT_ID"
-    exit 1
-fi
-
-ACCESS_TOKEN=$HARVEST_ACCESS_TOKEN
-ACCOUNT_ID=$HARVEST_ACCOUNT_ID
-PROJECT_ID=4948863   # Internal
-TASK_ID=2990320      # Vacation
-START_DATE="2021-08-23"
-END_DATE="2021-08-29"
 
 END=$(date -d "$END_DATE" "+%s")
 CURRENT=$(date -d "$START_DATE" "+%s")
